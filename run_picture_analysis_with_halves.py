@@ -7,6 +7,9 @@ import imageio
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
 
+import math
+import numpy
+
 import kfold_template
 
 category_dataset = pandas.read_csv("pictures_category.csv")
@@ -17,7 +20,13 @@ category_dataset = pandas.read_csv("pictures_category.csv")
 def getrgb(file_path):
 	imimage = imageio.imread(file_path, pilmode="RGB")
 	imimage = imimage/255
-	imimage = imimage.sum(axis = 0).sum(axis = 0)/(imimage.shape[0]*imimage.shape[1])
+	imimage_top = imimage[0:math.ceil(imimage.shape[0]/2),:]
+	imimage_bottom = imimage[math.ceil(imimage.shape[0]/2):imimage.shape[0],:]
+
+	imimage_top = imimage_top.sum(axis = 0).sum(axis = 0)/(imimage_top.shape[0]*imimage_top.shape[1])
+	imimage_bottom = imimage_bottom.sum(axis = 0).sum(axis = 0)/(imimage_bottom.shape[0]*imimage_bottom.shape[1])
+
+	imimage = numpy.concatenate((imimage_top, imimage_bottom))
 	return imimage
 
 # print(getrgb("pictures/pic01.jpeg"))
@@ -41,8 +50,9 @@ dataset = pandas.merge(image_dataset, category_dataset, on="filename")
 
 print(dataset)
 
-
 picture_attributes_count = len(image_dataset.columns) - 1
+
+
 
 data = dataset.iloc[:,0:picture_attributes_count].values
 
